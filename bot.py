@@ -21,39 +21,51 @@ driver.find_element(By.XPATH,r'//*[@id="passwd"]').send_keys('wlals0923!')
 driver.find_element(By.XPATH,r'//*[@id="loginform"]/table/tbody/tr[1]/td[2]/input').click()
 driver.find_element(By.XPATH,r'//*[@id="nav"]/li[5]/a').click()
 
-_cookies=driver.get_cookies()
-cookies_dict={}
-for cookie in _cookies:
-    cookies_dict[cookie['name']]=cookie['value']
+f = open("과제.txt", 'w')
+f.write('')
+f.close()
 
-session=requests.session()
-headers={'User-Agent':'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36'}
+for n in range(6):
+    try:
+        driver.find_element(By.XPATH,r'//*[@id="treebox"]/div/table/tbody/tr[%d]/td[2]/table/tbody/tr/td[4]/span' %(n+2)).click()
 
-session.headers.update(headers)
-session.cookies.update(cookies_dict)
+        _cookies=driver.get_cookies()
+        cookies_dict={}
+        for cookie in _cookies:
+            cookies_dict[cookie['name']]=cookie['value']
 
-res=session.get('https://lms.jbnu.ac.kr/paper/paperSelectGroup.jsp')
-page=driver.page_source
-soup=BeautifulSoup(page,'html.parser')
+        session=requests.session()
+        headers={'User-Agent':'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36'}
 
-subjects=[]
-link=soup.select_one('div.containerTableStyle')
-link2=link.select('table>tbody>tr>td>table>tbody>tr')
-for i in link2:
-    tmp=i.get_text()
-    subjects.append(tmp)
+        session.headers.update(headers)
+        session.cookies.update(cookies_dict)
 
-s = []
-search="2학기"
+        time.sleep(1)
 
-for k in list(subjects):
-    if search in k:
-        print(k)
-        s.append(k)
+        page=driver.page_source
+        soup=BeautifulSoup(page,'html.parser')
 
-name=pd.DataFrame(s)
-name.to_csv('과목명.txt',index=False,header=False)
-driver.close()
+        link=soup.select('#borderB > tbody > tr.btr > td:nth-child(2)')#.getText().replace(' ','').replace('\n','').replace('\t','')
+        link2=soup.select('#borderB > tbody > tr.btr > td:nth-child(3)')#.getText().replace(' ','').replace('\n','').replace('\t','')
 
-while(True):
-    pass
+        task=[]
+        for i in link:
+            tmp=i.get_text().replace(' ','').replace('\n','').replace('\t','')
+            task.append(tmp)
+            task.append("\n")
+
+        for k in link2:
+            tmp2=k.get_text().replace(' ','').replace('\n','').replace('\t','')
+            task.append(tmp2)
+            task.append("\n")
+
+        f=open("과제.txt",'a',encoding='UTF-8')
+
+        for i in task:
+            f.write(i)
+        
+        f.close()
+        driver.back()
+    except:
+        driver.back()
+
